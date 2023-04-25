@@ -239,30 +239,30 @@ def main(args, config):
     if config['use_roberta']:
         tokenizer = RobertaTokenizer.from_pretrained(config['text_encoder'])
     else:
-        tokenizer = BertTokenizer.from_pretrained(config['text_encoder'])
+        tokenizer = BertTokenizer.from_pretrained(config['text_encoder'])   
 
     print("Creating retrieval dataset", flush=True)
-    train_dataset, val_dataset, test_dataset = create_dataset('re', config, args.evaluate)
+    train_dataset, val_dataset = create_dataset('re', config, args.evaluate)
 
     start_time = time.time()
     print("### output_dir, ", args.output_dir, flush=True)
 
     if args.evaluate:
         print("Start evaluating", flush=True)
-        test_loader = create_loader([test_dataset], [None],
+        val_loader = create_loader([val_dataset], [None],
                                     batch_size=[config['batch_size_test']],
                                     num_workers=[4],
                                     is_trains=[False],
                                     collate_fns=[None])[0]
 
-        # score_val_i2t, score_val_t2i, = evaluation(model_without_ddp, val_loader, tokenizer, device, config)
-        score_test_i2t, score_test_t2i = evaluation(model_without_ddp, test_loader, tokenizer, device, config)
+        score_val_i2t, score_val_t2i, = evaluation(model_without_ddp, val_loader, tokenizer, device, config)
+        # score_test_i2t, score_test_t2i = evaluation(model_without_ddp, test_loader, tokenizer, device, config)
 
         if utils.is_main_process():
-            # val_result = itm_eval(score_val_i2t, score_val_t2i, val_loader.dataset.txt2img, val_loader.dataset.img2txt)
-            # print(val_result)
-            test_result = itm_eval(score_test_i2t, score_test_t2i, test_loader.dataset.txt2img, test_loader.dataset.img2txt)
-            print(test_result)
+            val_result = itm_eval(score_val_i2t, score_val_t2i, val_loader.dataset.txt2img, val_loader.dataset.img2txt)
+            print(val_result)
+            # test_result = itm_eval(score_test_i2t, score_test_t2i, test_loader.dataset.txt2img, test_loader.dataset.img2txt)
+            # print(test_result)
 
         dist.barrier()
 
@@ -281,12 +281,12 @@ def main(args, config):
         else:
             samplers = [None, None, None]
 
-        train_loader, val_loader, test_loader = create_loader([train_dataset, val_dataset, test_dataset], samplers,
+        train_loader, val_loader = create_loader([train_dataset, val_dataset], samplers,
                                                               batch_size=[config['batch_size_train']] + [
-                                                                  config['batch_size_test']] * 2,
-                                                              num_workers=[4, 4, 4],
-                                                              is_trains=[True, False, False],
-                                                              collate_fns=[None, None, None])
+                                                                  config['batch_size_test']] , 
+                                                              num_workers=[4, 4],
+                                                              is_trains=[True, False],
+                                                              collate_fns=[None, None])
 
         arg_opt = utils.AttrDict(config['optimizer'])
         optimizer = create_optimizer(arg_opt, model)
@@ -304,23 +304,23 @@ def main(args, config):
             train_stats = train(model, train_loader, optimizer, tokenizer, epoch, device, lr_scheduler, config)
 
             score_val_i2t, score_val_t2i, = evaluation(model_without_ddp, val_loader, tokenizer, device, config)
-            score_test_i2t, score_test_t2i = evaluation(model_without_ddp, test_loader, tokenizer, device, config)
+            #score_test_i2t, score_test_t2i = evaluation(model_without_ddp, test_loader, tokenizer, device, config)
 
             if utils.is_main_process():
                 val_result = itm_eval(score_val_i2t, score_val_t2i, val_loader.dataset.txt2img, val_loader.dataset.img2txt)
                 print(val_result)
-                test_result = itm_eval(score_test_i2t, score_test_t2i, test_loader.dataset.txt2img, test_loader.dataset.img2txt)
-                print(test_result)
+                #test_result = itm_eval(score_test_i2t, score_test_t2i, test_loader.dataset.txt2img, test_loader.dataset.img2txt)
+                #print(test_result)
 
                 log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},
                              **{f'val_{k}': v for k, v in val_result.items()},
-                             **{f'test_{k}': v for k, v in test_result.items()},
+                             #**{f'test_{k}': v for k, v in test_result.items()},
                              'epoch': epoch}
 
                 with open(os.path.join(args.output_dir, "log.txt"), "a") as f:
                     f.write(json.dumps(log_stats) + "\n")
 
-                if test_result['r_mean'] > best:
+                if val_result['r_mean'] > best:
                     save_obj = {
                         'model': model_without_ddp.state_dict(),
                         # 'optimizer': optimizer.state_dict(),
@@ -329,7 +329,7 @@ def main(args, config):
                         # 'epoch': epoch,
                     }
                     torch.save(save_obj, os.path.join(args.output_dir, 'checkpoint_best.pth'))
-                    best = test_result['r_mean']
+                    best = val_result['r_mean']
                     best_epoch = epoch
 
                 elif epoch >= config['schedular']['epochs'] - 1:

@@ -13,7 +13,7 @@ from utils.hdfs_io import HADOOP_BIN, hexists, hmkdir, hcopy
 
 ############ Set it correctly for distributed training across nodes
 NNODES = 1  # e.g. 1/2/3/4
-NPROC_PER_NODE = 8  # e.g. 8 gpus
+NPROC_PER_NODE = 2  # e.g. 8 gpus
 
 MASTER_ADDR = 'SET_IT'
 MASTER_PORT = 12345
@@ -240,6 +240,11 @@ def run(args):
     elif args.task == 'itr_flickr':
         assert os.path.exists("images/flickr30k-images")
         args.config = 'configs/Retrieval_flickr.yaml'
+        run_retrieval(args)
+
+    elif args.task == 'itr_bd':
+        assert os.path.exists("images/bd-images")
+        args.config = 'configs/Retrieval_bd.yaml'
         run_retrieval(args)
 
     elif args.task == 'vqa':

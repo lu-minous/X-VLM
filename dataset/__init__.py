@@ -72,13 +72,14 @@ def create_dataset(dataset, config, evaluate=False):
         return general_dataset, region_dataset
 
     elif dataset == 're':
-        test_dataset = re_eval_dataset(config['test_file'], test_transform, config['image_root'])
+        test_dataset = re_eval_dataset(config['val_file'], test_transform, config['image_root']) # use val_file as test_file
         if evaluate:
             return None, None, test_dataset
 
         train_dataset = re_train_dataset(config['train_file'], train_transform, config['image_root'])
         val_dataset = re_eval_dataset(config['val_file'], test_transform, config['image_root'])
-        return train_dataset, val_dataset, test_dataset
+        #return train_dataset, val_dataset, test_dataset
+        return train_dataset, val_dataset
 
     elif dataset == 'vqa':
         vqa_test_dataset = vqa_dataset(config['test_file'], test_transform, config['vqa_root'], config['vg_root'],

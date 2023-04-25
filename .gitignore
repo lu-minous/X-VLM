@@ -1,0 +1,6 @@
+images/
+data/
+__pycache__/
+
+*.th
+*.pth

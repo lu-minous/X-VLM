@@ -62,6 +62,7 @@ class re_eval_dataset(Dataset):
             self.image.append(ann['image'])
             self.img2txt[img_id] = []
             for i, caption in enumerate(ann['caption']):
+                #print(caption)
                 self.text.append(pre_caption(caption, self.max_words))
                 self.img2txt[img_id].append(txt_id)
                 self.txt2img[txt_id] = img_id

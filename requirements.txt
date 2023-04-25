@@ -4,7 +4,9 @@ ruamel_yaml
 opencv-python
 scikit-image
 matplotlib
-torch==1.7.1
-torchvision==0.8.2
+#torch==1.7.1
+torch==1.9.1
+# torchvision==0.8.2
+torchvision==0.10.1
 pycocotools
 pycocoevalcap
