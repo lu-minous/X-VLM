@@ -103,6 +103,7 @@ def evaluation(model, data_loader, tokenizer, device, config):
         image_feats.append(image_feat)
         image_embeds.append(image_embed)
 
+    #
     image_feats = torch.cat(image_feats, dim=0)
     image_embeds = torch.cat(image_embeds, dim=0)
     
@@ -163,6 +164,7 @@ def evaluation(model, data_loader, tokenizer, device, config):
     return score_matrix_i2t.cpu().numpy(), score_matrix_t2i.cpu().numpy()
 
 
+#EVAL
 @torch.no_grad()
 def itm_eval(scores_i2t, scores_t2i, txt2img, img2txt):
     # Images->Text
@@ -178,7 +180,7 @@ def itm_eval(scores_i2t, scores_t2i, txt2img, img2txt):
         ranks[index] = rank
 
     # Compute metrics
-    tr1 = 100.0 * len(np.where(ranks < 1)[0]) / len(ranks)
+    tr1 = 100.0 * len(np.where(ranks < 1)[0]) / len(ranks) #???
     tr5 = 100.0 * len(np.where(ranks < 5)[0]) / len(ranks)
     tr10 = 100.0 * len(np.where(ranks < 10)[0]) / len(ranks)
 
