@@ -1,6 +1,8 @@
-images/
-data/
+images/*.jpg
+data/*.bin
+data/finetune/
 __pycache__/
 
 *.th
 *.pth
+data/bert-base-uncased/pytorch_model.bin

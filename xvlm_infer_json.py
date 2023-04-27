@@ -119,34 +119,33 @@ def get_similarity(images, texts, device):
     sims = sims_matrix.cpu().numpy()
     print('sims.shape', sims.shape)
 
-    print(torch.cuda.memory_summary(device=None, abbreviated=False))
-    torch.cuda.empty_cache()
-    print(torch.cuda.memory_summary(device=None, abbreviated=False))
-
-    text_feats = torch.cat(text_feats, dim=0)
-    text_atts = torch.cat(text_atts, dim=0)
+    #torch.cuda.empty_cache()
+    text_feats = torch.cat(torch.tensor([item.cpu().detach().numpy() for item in text_feats]).cuda())
+    text_atts = torch.cat(torch.tensor([item.cpu().detach().numpy() for item in text_atts]).cuda())
+    
     print('text_feats.shape', text_feats.shape)
     print('text_atts.shape', text_atts.shape)
 
-    image_feats = torch.cat(image_feats, dim=0)
+    image_feats = torch.cat(torch.tensor([item.cpu().detach().numpy() for item in image_feats]).cuda())
+
     print('image_feats.shape', image_feats.shape)
 
 
     #calculate score
     k_test = 128
-    score_matrix_t2i = torch.zeros((num_text, num_image), dtype=torch.float).to(device)
+    score_matrix_t2i = torch.zeros((num_text, num_image), dtype=torch.float)
     for i, sims in enumerate(sims):
         topk, topk_idx = sims.topk(k_test, dim=0)
         encoder_output = image_feats[topk_idx]
-        encoder_att = torch.ones(encoder_output.size()[:-1], dtype=torch.long).to(device)
-        output = model.text_encoder(encoder_embeds=text_feats[i].repeat(k_test, 1, 1),
+        encoder_att = torch.ones(encoder_output.size()[:-1], dtype=torch.long)
+        output = model.cpu().text_encoder(encoder_embeds=text_feats[i].repeat(k_test, 1, 1),
                                     attention_mask=text_atts[i].repeat(k_test, 1),
                                     encoder_hidden_states=encoder_output,
                                     encoder_attention_mask=encoder_att,
                                     return_dict=True,
                                     mode='fusion'
                                     )
-        score = model.itm_head(output.last_hidden_state[:, 0, :])[:, 1]
+        score = model.cpu().itm_head(output.last_hidden_state[:, 0, :])[:, 1]
         score_matrix_t2i[i, topk_idx] = score
         print('score_matrix_t2i.shape', score_matrix_t2i.shape)
     end_time = time.time()
