@@ -108,6 +108,8 @@ def evaluation(model, data_loader, tokenizer, device, config):
     image_embeds = torch.cat(image_embeds, dim=0)
     
     sims_matrix = image_embeds @ text_embeds.t()
+    print(sims_matrix.shape)
+    
     score_matrix_i2t = torch.full((len(data_loader.dataset.image), len(texts)), -100.0).to(device)
 
     num_tasks = utils.get_world_size()
