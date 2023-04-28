@@ -334,7 +334,8 @@ def main(args, config):
                     best = val_result['r_mean']
                     best_epoch = epoch
 
-                elif epoch >= config['schedular']['epochs'] - 1:
+                #elif epoch >= config['schedular']['epochs'] - 1:
+                elif epoch % 2 == 0:
                     save_obj = {
                         'model': model_without_ddp.state_dict(),
                         # 'optimizer': optimizer.state_dict(),
@@ -343,6 +344,7 @@ def main(args, config):
                         # 'epoch': epoch,
                     }
                     torch.save(save_obj, os.path.join(args.output_dir, f'checkpoint_{epoch}.pth'))
+                
 
             dist.barrier()
             torch.cuda.empty_cache()

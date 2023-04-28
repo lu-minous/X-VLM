@@ -29,7 +29,9 @@ def create_dataset(dataset, config, evaluate=False):
     ])
 
     train_transform = transforms.Compose([
-        transforms.RandomResizedCrop(config['image_res'], scale=(0.5, 1.0),
+        # transforms.RandomResizedCrop(config['image_res'], scale=(0.5, 1.0), #ratio?
+        #                             interpolation=Image.BICUBIC),
+        transforms.RandomResizedCrop(config['image_res'], scale=(0.5, 1.0), ratio=(0.8, 1.2),  
                                      interpolation=Image.BICUBIC),
         transforms.RandomHorizontalFlip(),
         RandomAugment(2, 7, isPIL=True, augs=['Identity', 'AutoContrast', 'Equalize', 'Brightness', 'Sharpness',

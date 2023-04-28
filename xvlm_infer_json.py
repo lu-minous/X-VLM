@@ -56,6 +56,8 @@ def get_images_texts(images_root, texts_root, transform_ops, test=False):
         images.append(img)
         idx_dic[cnts] = image_name
         cnts += 1
+        if(cnts%1000==1):
+            print(cnts)
 
     if test:
         images = images[:20]
@@ -76,7 +78,7 @@ def get_similarity(images, texts, device):
 
     num_image = len(images)
     num_text = len(texts)
-    step = 10 #save memory
+    step = 20 #save memory
     
     text_feats = []
     text_embeds = []  
@@ -108,11 +110,9 @@ def get_similarity(images, texts, device):
         image_feats.append(image_feat)
 
     text_embeds = torch.cat(text_embeds, dim=0)
-
-
     print('text_embeds.shape', text_embeds.shape)
-    image_embeds = torch.cat(image_embeds, dim=0)
 
+    image_embeds = torch.cat(image_embeds, dim=0)
     print('image_embeds.shape', image_embeds.shape)
 
     sims_matrix = torch.mm(text_embeds, image_embeds.t())
@@ -120,34 +120,36 @@ def get_similarity(images, texts, device):
     print('sims.shape', sims.shape)
 
     #torch.cuda.empty_cache()
-    text_feats = torch.cat(torch.tensor([item.cpu().detach().numpy() for item in text_feats]).cuda())
-    text_atts = torch.cat(torch.tensor([item.cpu().detach().numpy() for item in text_atts]).cuda())
+    #text_feats = torch.cat(torch.tensor([item.cpu().detach().numpy() for item in text_feats]).cuda())
+    #text_atts = torch.cat(torch.tensor([item.cpu().detach().numpy() for item in text_atts]).cuda())
     
-    print('text_feats.shape', text_feats.shape)
-    print('text_atts.shape', text_atts.shape)
+    #print('text_feats.shape', text_feats.shape)
+    #print('text_atts.shape', text_atts.shape)
 
-    image_feats = torch.cat(torch.tensor([item.cpu().detach().numpy() for item in image_feats]).cuda())
+    #image_feats = torch.cat(torch.tensor([item.cpu().detach().numpy() for item in image_feats]).cuda())
 
-    print('image_feats.shape', image_feats.shape)
+    #print('image_feats.shape', image_feats.shape)
 
-
+    
     #calculate score
-    k_test = 128
-    score_matrix_t2i = torch.zeros((num_text, num_image), dtype=torch.float)
-    for i, sims in enumerate(sims):
-        topk, topk_idx = sims.topk(k_test, dim=0)
-        encoder_output = image_feats[topk_idx]
-        encoder_att = torch.ones(encoder_output.size()[:-1], dtype=torch.long)
-        output = model.cpu().text_encoder(encoder_embeds=text_feats[i].repeat(k_test, 1, 1),
-                                    attention_mask=text_atts[i].repeat(k_test, 1),
-                                    encoder_hidden_states=encoder_output,
-                                    encoder_attention_mask=encoder_att,
-                                    return_dict=True,
-                                    mode='fusion'
-                                    )
-        score = model.cpu().itm_head(output.last_hidden_state[:, 0, :])[:, 1]
-        score_matrix_t2i[i, topk_idx] = score
-        print('score_matrix_t2i.shape', score_matrix_t2i.shape)
+    '''
+    # k_test = 128
+    # score_matrix_t2i = torch.zeros((num_text, num_image), dtype=torch.float)
+    # for i, sims in enumerate(sims):
+    #     topk, topk_idx = sims.topk(k_test, dim=0)
+    #     encoder_output = image_feats[topk_idx]
+    #     encoder_att = torch.ones(encoder_output.size()[:-1], dtype=torch.long)
+    #     output = model.cpu().text_encoder(encoder_embeds=text_feats[i].repeat(k_test, 1, 1),
+    #                                 attention_mask=text_atts[i].repeat(k_test, 1),
+    #                                 encoder_hidden_states=encoder_output,
+    #                                 encoder_attention_mask=encoder_att,
+    #                                 return_dict=True,
+    #                                 mode='fusion'
+    #                                 )
+    #     score = model.cpu().itm_head(output.last_hidden_state[:, 0, :])[:, 1]
+    #     score_matrix_t2i[i, topk_idx] = score
+    #     print('score_matrix_t2i.shape', score_matrix_t2i.shape)
+    '''
     end_time = time.time()
     print('Computing features cost time: ', end_time - start_time)
  

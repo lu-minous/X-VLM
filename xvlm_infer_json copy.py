@@ -127,7 +127,7 @@ def get_similarity(images, texts, device):
 
     #calculate score
     k_test = 128
-    score_matrix_t2i = torch.zeros((num_text, num_image), dtype=torch.float).to(device)
+    score_matrix_t2i = torch.full((num_text, num_image), -100, dtype=torch.float).to(device)
     for i, sims in enumerate(sims):
         topk, topk_idx = sims.topk(k_test, dim=0)
         encoder_output = image_feats[topk_idx]
