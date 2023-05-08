@@ -31,7 +31,7 @@ def create_dataset(dataset, config, evaluate=False):
     train_transform = transforms.Compose([
         # transforms.RandomResizedCrop(config['image_res'], scale=(0.5, 1.0), #ratio?
         #                             interpolation=Image.BICUBIC),
-        transforms.RandomResizedCrop(config['image_res'], scale=(0.5, 1.0), ratio=(0.8, 1.2),  
+        transforms.RandomResizedCrop(config['image_res'], scale=(0.3, 1.0), ratio=(0.8, 1.2),  
                                      interpolation=Image.BICUBIC),
         transforms.RandomHorizontalFlip(),
         RandomAugment(2, 7, isPIL=True, augs=['Identity', 'AutoContrast', 'Equalize', 'Brightness', 'Sharpness',
@@ -79,6 +79,7 @@ def create_dataset(dataset, config, evaluate=False):
             return None, None, test_dataset
 
         train_dataset = re_train_dataset(config['train_file'], train_transform, config['image_root'])
+        print('train scale, ratio: ', train_transform.transforms[0].scale, train_transform.transforms[0].ratio)
         val_dataset = re_eval_dataset(config['val_file'], test_transform, config['image_root'])
         #return train_dataset, val_dataset, test_dataset
         return train_dataset, val_dataset

@@ -165,15 +165,35 @@ def infer(similarity, idx_dic, texts):
     for i in range (len(similarity_argsort)):
         dic = {'text': texts[i], 'image_names': []}
         for j in range(topk):
-            '''
+            dic['image_names'].append(idx_dic[similarity_argsort[i,j]])
+        result_list.append(dic)
+    with open('infer_json.json', 'w') as f:
+        f.write(json.dumps({'results': result_list}, indent=4))
+
+    #only car
+    result_list = []
+    for i in range (len(similarity_argsort)):
+        dic = {'text': texts[i], 'image_names': []}
+        for j in range(topk):
+            if(i < 7611):   #car 
+                dic['image_names'].append(idx_dic[similarity_argsort[i,j]])
+            else:   #person
+                dic['image_names'].append(idx_dic[similarity_argsort[i,-j-1]])
+        result_list.append(dic)
+    with open('infer_car_json.json', 'w') as f:
+        f.write(json.dumps({'results': result_list}, indent=4))
+
+    #only person
+    result_list = []
+    for i in range (len(similarity_argsort)):
+        dic = {'text': texts[i], 'image_names': []}
+        for j in range(topk):
             if(i < 7611):   #car 
                 dic['image_names'].append(idx_dic[similarity_argsort[i,-j-1]])
             else:   #person
                 dic['image_names'].append(idx_dic[similarity_argsort[i,j]])
-            '''
-            dic['image_names'].append(idx_dic[similarity_argsort[i,j]])
         result_list.append(dic)
-    with open('infer_json.json', 'w') as f:
+    with open('infer_person_json.json', 'w') as f:
         f.write(json.dumps({'results': result_list}, indent=4))
         
 
@@ -187,6 +207,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--checkpoint', type=str, required=True)
     parser.add_argument('--config', type=str, required=True)
+    
 
     args = parser.parse_args()
     print('args', args)

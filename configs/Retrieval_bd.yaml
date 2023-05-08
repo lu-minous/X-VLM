@@ -1,5 +1,7 @@
 #train_file:  ['data/finetune/bd_train.json']
-train_file:  ['data/finetune/bd_train_f.json']
+#train_file:  ['data/finetune/bd_train_f.json']
+#train_file:  ['data/finetune/bd_train_filter.json'] #filter out the images
+train_file:  ['data/finetune/bd_train_v3.json'] #filter out the images
 val_file: 'data/finetune/bd_val.json'
 #test_file: 'data/finetune/bd_test.json'
 image_root: 'images/bd-images/'
@@ -33,13 +35,13 @@ temp: 0.07
 k_test: 128  #128,10?
 
 
-## Other Settings
+# Other Settings
 optimizer: {opt: adamW, lr: 5e-5, weight_decay: 0.01, lr_mult: 2}
-schedular: {sched: linear, lr: 5e-5, epochs: 30, num_warmup_steps: 0.1}
+schedular: {sched: linear, lr: 5e-5, epochs: 24, num_warmup_steps: 0.1}
 
 #for resume
-#optimizer: {opt: adamW, lr: 3e-5, weight_decay: 0.01, lr_mult: 2}
-#schedular: {sched: linear, lr: 3e-5, epochs: 20, num_warmup_steps: 0}
+#optimizer: {opt: adamW, lr: 1e-5, weight_decay: 0.01, lr_mult: 2}
+#schedular: {sched: linear, lr: 1e-5, epochs: 4, num_warmup_steps: 0}
 
 #python3 run.py --task "itr_bd" --dist "1" --output_dir "output/bd_itr" --checkpoint "16m_base_model_state_step_199999.th"
 

@@ -109,7 +109,7 @@ def evaluation(model, data_loader, tokenizer, device, config):
     
     sims_matrix = image_embeds @ text_embeds.t()
     print(sims_matrix.shape)
-    
+
     score_matrix_i2t = torch.full((len(data_loader.dataset.image), len(texts)), -100.0).to(device)
 
     num_tasks = utils.get_world_size()
@@ -118,7 +118,7 @@ def evaluation(model, data_loader, tokenizer, device, config):
     start = rank * step
     end = min(sims_matrix.size(0), start + step)
 
-    for i, sims in enumerate(metric_logger.log_every(sims_matrix[start:end], 50, header)):
+    for i, sims in enumerate(metric_logger.log_every(sims_matrix[start:end], 50, header)): #???
         topk_sim, topk_idx = sims.topk(k=config['k_test'], dim=0)
 
         encoder_output = image_feats[start + i].repeat(config['k_test'], 1, 1)
@@ -337,7 +337,7 @@ def main(args, config):
                     best_epoch = epoch
 
                 #elif epoch >= config['schedular']['epochs'] - 1:
-                elif epoch % 2 == 0:
+                if epoch>8 and epoch % 2 == 1:
                     save_obj = {
                         'model': model_without_ddp.state_dict(),
                         # 'optimizer': optimizer.state_dict(),
@@ -345,7 +345,7 @@ def main(args, config):
                         'config': config,
                         # 'epoch': epoch,
                     }
-                    torch.save(save_obj, os.path.join(args.output_dir, f'checkpoint_{epoch}.pth'))
+                    torch.save(save_obj, os.path.join(args.output_dir, f'checkpoint_s1_{epoch+1}e.pth'))
                 
 
             dist.barrier()

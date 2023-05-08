@@ -1,0 +1,20 @@
+batch_size_test: 8
+batch_size_test_text: 64
+batch_size_train: 12
+embed_dim: 256
+image_res: 384
+image_root: images/bd-images/
+k_test: 128
+max_tokens: 40
+optimizer: {lr: 5e-05, lr_mult: 2, opt: adamW, weight_decay: 0.01}
+patch_size: 32
+schedular: {epochs: 24, lr: 5e-05, num_warmup_steps: 0.1, sched: linear}
+temp: 0.07
+text_config: configs/config_bert.json
+text_encoder: data/bert-base-uncased
+train_file: [data/finetune/bd_train_v3.json]
+use_clip_vit: false
+use_roberta: false
+use_swin: true
+val_file: data/finetune/bd_val.json
+vision_config: configs/config_swinB_384.json
